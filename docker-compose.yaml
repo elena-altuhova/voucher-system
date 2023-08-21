@@ -15,6 +15,23 @@ services:
     ports:
       - "5432:5432"
     restart: unless-stopped
+    networks:
+      - voucher-network
+
+  voucher-app:
+     image: "voucher-application:local"
+     container_name: voucher-system
+     depends_on:
+       - postgres
+     ports:
+       - "8080:8080"
+     restart: unless-stopped
+     networks:
+       - voucher-network
 volumes:
   dbvouch:
     external: true
+
+networks:
+  voucher-network:
+    driver: bridge
