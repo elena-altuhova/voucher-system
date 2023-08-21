@@ -33,6 +33,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static io.github.elenaaltuhova.vouchersystem.enums.VoucherStatus.ISSUED;
+import static io.github.elenaaltuhova.vouchersystem.enums.VoucherStatus.REDEEMED;
+import static io.github.elenaaltuhova.vouchersystem.enums.VoucherStatus.SENT;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -61,7 +63,7 @@ public class VoucherServiceTest {
     public void checkAValidVoucher(String code) throws VoucherNotValidException, VoucherAlreadyRedeemedException, VoucherExpiredException {
         //Given
         BDDMockito.given(voucherRepository.findByCode(UUID.fromString("aafefde5-d7cf-474f-90c9-6957958456a1")))
-            .willReturn(getMockValidVoucher());
+            .willReturn(getMockValidVoucherWithStatus(ISSUED));
         BDDMockito.given(voucherRepository.findByCode(UUID.fromString("191e1f74-8c48-4099-9a49-717e8e5cf015")))
             .willReturn(getMockValidVoucherWithEndDate());
 
@@ -113,7 +115,7 @@ public class VoucherServiceTest {
     public void checkRedeemedVoucher() {
         //Given
         BDDMockito.given(voucherRepository.findByCode(UUID.fromString("000bbf73-0e4d-4e09-aaea-81c41f019fbd")))
-            .willReturn(getMockRedeemedVoucher());
+            .willReturn(getMockValidVoucherWithStatus(REDEEMED));
 
         //When
         Exception exception = assertThrows(VoucherAlreadyRedeemedException.class, () -> {
@@ -145,8 +147,8 @@ public class VoucherServiceTest {
     public void redeemValidVoucher() throws VoucherNotValidException, VoucherAlreadyRedeemedException, VoucherExpiredException {
         //Given
         BDDMockito.given(voucherRepository.findById((1L)))
-            .willReturn(Optional.of(getMockValidVoucher()))
-            .willReturn(Optional.of(getMockRedeemedValidVoucher()));
+            .willReturn(Optional.of(getMockValidVoucherWithStatus(ISSUED)))
+            .willReturn(Optional.of(getMockValidVoucherWithStatus(REDEEMED)));
 
         //When
        VoucherResponseDTO voucherResponseDTO = voucherService.redeem(1L);
@@ -171,21 +173,23 @@ public class VoucherServiceTest {
             .willReturn(status);
 
         BDDMockito.given(voucherRepository.findFirstByCampaignAndStatus(Mockito.eq(campaign), Mockito.eq(status)))
-            .willReturn(Optional.of(getMockValidVoucher()));
+            .willReturn(Optional.of(getMockValidVoucherWithStatus(ISSUED)));
+        BDDMockito.given(voucherRepository.findByCode(UUID.fromString("aafefde5-d7cf-474f-90c9-6957958456a1")))
+            .willReturn(getMockValidVoucherWithStatus(SENT));
 
         //When
-        VoucherResponseDTO voucherResponseDTO = voucherService.findValidVoucherforACampaign(1L);
+        VoucherResponseDTO voucherResponseDTO = voucherService.sendValidVoucherForACampaign(1L);
 
         //Then
         assertThat(voucherResponseDTO, notNullValue());
         assertThat(voucherResponseDTO.getCampaignName(), is(equalTo("Test Campaign")));
-        assertThat(voucherResponseDTO.getStatus(), is(equalTo("ISSUED")));
+        assertThat(voucherResponseDTO.getStatus(), is(equalTo("SENT")));
         assertThat(voucherResponseDTO.getId(), is(equalTo(1L)));
     }
 
     @Test
     @DisplayName("Get Valid Voucher for a campaign when no vouchers available")
-    public void noValidVouchersForCampaign() throws CampaignExpiredException, NoValidVouchersAvailableException {
+    public void noValidVouchersForCampaign() {
         //Given
         Status status = new Status(1L, VoucherStatus.ISSUED);
         Campaign campaign = new Campaign(1L, "Test Campaign", LocalDate.parse("2023-01-01"), null);
@@ -200,7 +204,7 @@ public class VoucherServiceTest {
 
         //When
         Exception exception = assertThrows(NoValidVouchersAvailableException.class, () -> {
-            voucherService.findValidVoucherforACampaign(1L);
+            voucherService.sendValidVoucherForACampaign(1L);
         });
 
         //Then
@@ -220,7 +224,7 @@ public class VoucherServiceTest {
 
         //When
         Exception exception = assertThrows(NoSuchElementException.class, () -> {
-            voucherService.findValidVoucherforACampaign(1L);
+            voucherService.sendValidVoucherForACampaign(1L);
         });
 
         //Then
@@ -241,20 +245,16 @@ public class VoucherServiceTest {
 
         //When
         Exception exception = assertThrows(CampaignExpiredException.class, () -> {
-            voucherService.findValidVoucherforACampaign(1L);
+            voucherService.sendValidVoucherForACampaign(1L);
         });
 
         //Then
         assertThat(exception.getMessage(), is(equalTo("Campaign has already expired.")));
     }
 
-    private Voucher getMockValidVoucher() {
+    private Voucher getMockValidVoucherWithStatus(VoucherStatus status) {
         Campaign campaign = new Campaign(1L, "Test Campaign", LocalDate.parse("2023-01-01"), null);
-        return new Voucher(1L, UUID.fromString("aafefde5-d7cf-474f-90c9-6957958456a1"), campaign, new Status(1L, VoucherStatus.ISSUED));
-    }
-    private Voucher getMockRedeemedValidVoucher() {
-        Campaign campaign = new Campaign(1L, "Test Campaign", LocalDate.parse("2023-01-01"), null);
-        return new Voucher(1L, UUID.fromString("aafefde5-d7cf-474f-90c9-6957958456a1"), campaign, new Status(1L, VoucherStatus.REDEEMED));
+        return new Voucher(1L, UUID.fromString("aafefde5-d7cf-474f-90c9-6957958456a1"), campaign, new Status(1L, status));
     }
 
     private Voucher getMockValidVoucherWithEndDate() {
@@ -265,11 +265,6 @@ public class VoucherServiceTest {
     private Voucher getMockExpiredVoucher() {
         Campaign campaign = new Campaign(2L, "Expired Test Campaign", LocalDate.parse("2023-01-01"), LocalDate.parse("2023-01-02"));
         return new Voucher(1L, UUID.fromString("4ada2f1c-c129-44a2-b85c-6ad71fb0614e"), campaign, new Status(1L, VoucherStatus.ISSUED));
-    }
-
-    private Voucher getMockRedeemedVoucher() {
-        Campaign campaign = new Campaign(1L, "Test Campaign", LocalDate.parse("2023-01-01"), null);
-        return new Voucher(1L, UUID.fromString("000bbf73-0e4d-4e09-aaea-81c41f019fbd"), campaign, new Status(1L, VoucherStatus.REDEEMED));
     }
 
     private Voucher getMockNotStartedVoucher() {

@@ -34,5 +34,5 @@ public interface VoucherService {
      * @param campaignId
      * @return <code>VoucherResponseDTO</code> object
      */
-    VoucherResponseDTO findValidVoucherforACampaign(Long campaignId) throws CampaignExpiredException, NoValidVouchersAvailableException;
+    VoucherResponseDTO sendValidVoucherForACampaign(Long campaignId) throws CampaignExpiredException, NoValidVouchersAvailableException;
 }
