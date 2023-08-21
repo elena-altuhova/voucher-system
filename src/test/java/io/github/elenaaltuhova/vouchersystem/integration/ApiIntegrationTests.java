@@ -49,7 +49,7 @@ public class ApiIntegrationTests {
         headers.set("X-API-KEY", "testkey");
         final HttpEntity<CampaignDTO> entity = new HttpEntity<>(campaignDTO, headers);
 
-        String json = "{\"data\":{\"id\":4,\"title\":\"Test Campaign 98\",\"startDate\":\"2023-08-01\",\"endDate\":null,\"" +
+        String json = "{\"data\":{\"id\":4,\"title\":\"Test Campaign 22\",\"startDate\":\"2023-08-01\",\"endDate\":null,\"" +
             "links\":[{\"rel\":\"self\",\"href\":\"http://localhost:" + port + "/v1/campaigns/4\"}]}}";
 
         //When
