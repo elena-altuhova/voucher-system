@@ -43,13 +43,13 @@ public class ApiIntegrationTests {
     @Order(1)
     public void testCreateCampaign() {
         //Given
-        CampaignDTO campaignDTO = new CampaignDTO("Test Campaign 98", LocalDate.now(), null);
+        CampaignDTO campaignDTO = new CampaignDTO("Test Campaign 98", LocalDate.parse("2023-08-01"), null);
 
         final HttpHeaders headers = new HttpHeaders();
         headers.set("X-API-KEY", "testkey");
         final HttpEntity<CampaignDTO> entity = new HttpEntity<>(campaignDTO, headers);
 
-        String json = "{\"data\":{\"id\":4,\"title\":\"Test Campaign 98\",\"startDate\":\"2023-08-20\",\"endDate\":null,\"" +
+        String json = "{\"data\":{\"id\":4,\"title\":\"Test Campaign 98\",\"startDate\":\"2023-08-01\",\"endDate\":null,\"" +
             "links\":[{\"rel\":\"self\",\"href\":\"http://localhost:" + port + "/v1/campaigns/4\"}]}}";
 
         //When
