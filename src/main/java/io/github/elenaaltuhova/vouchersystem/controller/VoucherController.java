@@ -132,7 +132,7 @@ public class VoucherController {
         VoucherResponseDTO voucherDTO = null;
 
         try {
-            voucherDTO = voucherService.findValidVoucherforACampaign(campaignId);
+            voucherDTO = voucherService.sendValidVoucherForACampaign(campaignId);
         } catch (CampaignExpiredException exception) {
             log.error(exception.getMessage());
             response.addErrorMsgToResponse(exception.getMessage());
@@ -142,6 +142,7 @@ public class VoucherController {
             response.addErrorMsgToResponse(exception.getMessage());
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
+
 
         response.setData(voucherDTO);
         createCheckLink(voucherDTO);

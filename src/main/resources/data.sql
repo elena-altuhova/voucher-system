@@ -6,7 +6,8 @@ VALUES ('Free Shipping', '2023-05-23', null),
 
 INSERT INTO status(status_name)
 VALUES ('ISSUED'),
-       ('REDEEMED');
+       ('REDEEMED'),
+       ('SENT');
 
 INSERT INTO vouchers(code, campaign_id, status_id)
 VALUES ('ce90dfbd-ff2a-4e43-941c-ea26c04c6e7e', 1, 1),

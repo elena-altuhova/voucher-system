@@ -80,7 +80,7 @@ public class ApiIntegrationTests {
     }
 
     @Test
-    @Order(2)
+    @Order(3)
     public void testAddVouchersForCampaign() {
         //Given
         final HttpHeaders headers = new HttpHeaders();
@@ -96,7 +96,7 @@ public class ApiIntegrationTests {
     }
 
     @Test
-    @Order(3)
+    @Order(4)
     public void testCheckVoucher() {
         //Given
         final HttpHeaders headers = new HttpHeaders();
@@ -117,7 +117,7 @@ public class ApiIntegrationTests {
     }
 
     @Test
-    @Order(3)
+    @Order(5)
     public void testSendValidVoucher() {
         //Given
         final HttpHeaders headers = new HttpHeaders();
@@ -126,7 +126,7 @@ public class ApiIntegrationTests {
 
         String
             responseBody =
-            "{\"data\":{\"code\":\"ce90dfbd-ff2a-4e43-941c-ea26c04c6e7e\",\"campaignName\":\"Free Shipping\",\"status\":\"ISSUED\"," +
+            "{\"data\":{\"code\":\"ce90dfbd-ff2a-4e43-941c-ea26c04c6e7e\",\"campaignName\":\"Free Shipping\",\"status\":\"SENT\"," +
                 "\"id\":1,\"links\":[{\"rel\":\"check\",\"href\":\"http://localhost:" + port + "/v1/vouchers/ce90dfbd-ff2a-4e43-941c-ea26c04c6e7e/check\"}]}}";
 
         //When
@@ -138,7 +138,7 @@ public class ApiIntegrationTests {
     }
 
     @Test
-    @Order(3)
+    @Order(6)
     public void testRedeemVoucher() {
         //Given
         final HttpHeaders headers = new HttpHeaders();

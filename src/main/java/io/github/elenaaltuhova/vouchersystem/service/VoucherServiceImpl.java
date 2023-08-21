@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import static io.github.elenaaltuhova.vouchersystem.enums.VoucherStatus.ISSUED;
 import static io.github.elenaaltuhova.vouchersystem.enums.VoucherStatus.REDEEMED;
+import static io.github.elenaaltuhova.vouchersystem.enums.VoucherStatus.SENT;
 
 @Service
 public class VoucherServiceImpl implements VoucherService {
@@ -59,6 +60,11 @@ public class VoucherServiceImpl implements VoucherService {
         return voucherRepository.findById(voucherId).get().convertEntityToResponseDTO();
     }
 
+    /**
+     * Method that combines all validations for checking Voucher.
+     *
+     * @param voucher
+     */
     private void checkIfValid(Voucher voucher) throws VoucherNotValidException, VoucherExpiredException, VoucherAlreadyRedeemedException {
         if (voucher == null) {
             throw new VoucherNotValidException("Voucher not valid.");
@@ -82,10 +88,10 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     /**
-     * @see VoucherService#findValidVoucherforACampaign(Long)
+     * @see VoucherService#sendValidVoucherForACampaign(Long)
      */
     @Override
-    public VoucherResponseDTO findValidVoucherforACampaign(Long campaignId) throws CampaignExpiredException, NoValidVouchersAvailableException {
+    public VoucherResponseDTO sendValidVoucherForACampaign(Long campaignId) throws CampaignExpiredException, NoValidVouchersAvailableException {
         Optional<Campaign> foundCampaign = campaignRepository.findById(campaignId);
 
         if (!foundCampaign.isPresent()) {
@@ -109,6 +115,8 @@ public class VoucherServiceImpl implements VoucherService {
             throw new NoValidVouchersAvailableException("There are no available vouchers available for this campaign.");
         }
 
-        return validVoucher.get().convertEntityToResponseDTO();
+        voucherRepository.updateStatusById(validVoucher.get().getId(), statusRepository.findByStatusName(SENT));
+
+        return voucherRepository.findByCode(validVoucher.get().getCode()).convertEntityToResponseDTO();
     }
 }
