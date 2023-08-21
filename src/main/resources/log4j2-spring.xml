@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="%d [%level] [%t] [%logger{40}] - %msg%n%throwable" />
+        </Console>
+
+        <RollingFile name="RollingFile"
+                     fileName="/var/log/apis/voucher-system/voucher-system-api.log"
+                     filePattern="/var/log/apis/oucher-system-api/$${date:yyyy-MM}/oucher-system-api.log-%d{MM-dd-yyyy}-%i.log.tar.gz">
+            <PatternLayout
+                    pattern="%d [%level] [%t] [%logger{40}] - %msg%n%throwable" />
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="250 MB" />
+            </Policies>
+        </RollingFile>
+
+    </Appenders>
+
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
+        </Root>
+        <logger name="org.springframework.web.filter.CommonsRequestLoggingFilter">
+            <level value="DEBUG" />
+        </logger>
+    </Loggers>
+</Configuration>
