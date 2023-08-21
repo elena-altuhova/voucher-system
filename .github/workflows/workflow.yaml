@@ -47,7 +47,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             # branch event
-            type=ref,enable=true,priority=600,prefix=,suffix={{sha}},event=branch
+            type=ref,enable=true,priority=600,prefix=,suffix=-{{sha}},event=branch
             # pull request event
             type=ref,enable=true,priority=600,prefix=pr-,suffix=,event=pr
 
