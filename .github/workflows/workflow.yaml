@@ -17,7 +17,10 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    permissions:
+      checks: write
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 17
@@ -30,15 +33,6 @@ jobs:
       - name: Publish Test Report
         if: success() || failure()
         uses: scacap/action-surefire-report@v1
-
-  build-and-push-image:
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
       - name: Log in to the Container registry
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
@@ -52,15 +46,16 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            # dynamically set the branch name as a prefix
-            type=sha,prefix={{branch}}-
-            # dynamically set the branch name and sha as a custom tag
-            type=raw,value=mytag-{{branch}}-{{sha}}
+            # branch event
+            type=ref,enable=true,priority=600,prefix=,suffix={{sha}},event=branch
+            # pull request event
+            type=ref,enable=true,priority=600,prefix=pr-,suffix=,event=pr
 
       - name: Build and push Docker image
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
-          context: application.dockerfile
+          context: .
+          file: application.dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
